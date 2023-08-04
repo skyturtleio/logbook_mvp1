@@ -6,7 +6,7 @@ interface Todo {
 	done: boolean;
 }
 
-export function getTodos(userId: string): Todo[] {
+export function getTodos(userId: string | undefined): Todo[] {
 	if (!db.get(userId)) {
 		db.set(userId, [
 			{
@@ -20,12 +20,19 @@ export function getTodos(userId: string): Todo[] {
 	return db.get(userId);
 }
 
-export function createTodo(userId: string | undefined, description: string | null) {
+export function createTodo(userId: string | undefined, description: string) {
 	const todos: Todo[] = db.get(userId);
-	let defaultDescription;
 
-	if (!description) {
-		defaultDescription = 'default';
+	if (!userId) {
+		throw new Error('Todo must have an associated userId');
+	}
+
+	if (!description || description === null) {
+		throw new Error('Todo must have description');
+	}
+
+	if (description === '') {
+		throw new Error("Description can't be empty");
 	}
 
 	todos.push({
